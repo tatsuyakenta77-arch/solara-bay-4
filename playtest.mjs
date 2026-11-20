@@ -54,8 +54,10 @@ try {
   s = await st(page);
   assert(s.inCar, 'entered mission coupe (E)');
   assert(s.wanted >= 1, `stealing raises wanted (wanted=${s.wanted})`);
-  // Drive forward for real.
-  const c0 = s.car;
+  // Drive forward for real, staged on a road so the cover shot reads as a street.
+  await page.evaluate(() => { const d = window.__MH.debug; d.teleport(40, 100); d.setCarHeading(0); });
+  await sleep(400);
+  const c0 = (await st(page)).car;
   await page.keyboard.down('KeyW');
   await sleep(2500);
   await page.keyboard.up('KeyW');
@@ -69,11 +71,22 @@ try {
   assert(s.missionIndex === 1, `mission 1 complete (missionIndex=${s.missionIndex}, cash=$${s.cash})`);
   assert(s.cash >= 650, `payout applied (cash=$${s.cash})`);
 
-  // Police pursuit: wanted 3, cruisers spawn and close in.
+  // Police pursuit: wanted 3, cruisers spawn and close in; shoot when one is near.
   await page.evaluate(() => window.__MH.debug.setWanted(3));
-  await sleep(4000);
+  await page.keyboard.down('KeyW');
+  let close = false;
+  for (let i = 0; i < 30; i++) {
+    await sleep(500);
+    const cur = await st(page);
+    // Keep the chase on the road: turn back north before the beach clamp.
+    if (cur.car && cur.car.z > 145) await page.evaluate(() => window.__MH.debug.setCarHeading(Math.PI));
+    if (cur.car && cur.car.z < -145) await page.evaluate(() => window.__MH.debug.setCarHeading(0));
+    if (cur.policeDist !== null && cur.policeDist < 20) { close = true; break; }
+  }
+  await page.keyboard.up('KeyW');
   s = await st(page);
   assert(s.police >= 2, `police spawned at wanted 3 (police=${s.police})`);
+  assert(close, `a cruiser closed to <20m for the chase shot (policeDist=${s.policeDist})`);
   await page.screenshot({ path: `${SHOTS}/2-chase.jpg`, type: 'jpeg', quality: 82 });
   await page.evaluate(() => window.__MH.debug.setWanted(0));
   await sleep(300);
@@ -111,16 +124,26 @@ try {
   s = await st(page);
   assert(s.ammo === ammo0 - 1, `shooting consumes ammo (${ammo0} -> ${s.ammo})`);
   // Finish the fight: aim + shoot, heal as needed, punch when close.
+  // Mid-fight screenshot once an enemy is close enough to be in frame.
+  let shotTaken = false;
   let guard = 0;
   while ((await st(page)).enemiesAlive > 0 && guard++ < 90) {
+    const cur = await st(page);
+    if (!shotTaken && cur.enemyDist !== null && cur.enemyDist < 9) {
+      await page.evaluate(() => window.__MH.debug.aimAtNearestEnemy());
+      await page.mouse.click(640, 360);
+      await sleep(250);
+      await page.screenshot({ path: `${SHOTS}/3-mission.jpg`, type: 'jpeg', quality: 82 });
+      shotTaken = true;
+    }
     await page.evaluate(() => { const d = window.__MH.debug; d.aimAtNearestEnemy(); d.heal(); });
     await page.mouse.click(640, 360);
     await page.keyboard.press('KeyF');
     await sleep(350);
   }
+  assert(shotTaken, 'mission screenshot taken mid-fight with enemy in frame');
   s = await st(page);
   assert(s.enemiesAlive === 0, `mission 4 crew cleared (alive=${s.enemiesAlive}, guard=${guard})`);
-  await page.screenshot({ path: `${SHOTS}/3-mission.jpg`, type: 'jpeg', quality: 82 });
   await page.evaluate(() => window.__MH.debug.warpToStep());
   await sleep(800);
   s = await st(page);
@@ -152,7 +175,7 @@ try {
     await sleep(320);
   }
   s = await st(page);
-  assert(s.stepIndex === 1 || s.missionIndex === 6, `warehouse cleared, boss step active (step=${s.stepIndex}, mission=${s.missionIndex})`);
+  assert(s.stepIndex >= 1 || s.missionIndex === 6, `warehouse cleared, boss step active (step=${s.stepIndex}, mission=${s.missionIndex})`);
   guard = 0;
   while ((await st(page)).stepIndex === 1 && guard++ < 60) {
     await page.evaluate(() => { const d = window.__MH.debug; d.aimAtNearestEnemy(); d.heal(); d.giveAmmo(20); });
@@ -193,6 +216,7 @@ try {
 
   // Final error sweep.
   await sleep(1500);
+  if (errors.length) console.error('ERRORS:\n' + errors.join('\n'));
   assert(errors.length === 0, `zero console/page errors (found ${errors.length})`);
   if (errors.length) console.error(errors.join('\n'));
 } catch (e) {

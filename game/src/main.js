@@ -951,6 +951,8 @@ window.__MH = {
       carsStolen: state.carsStolen, enemiesDefeated: state.enemiesDefeated,
       enemiesAlive: enemies.filter((e) => e.alive).length,
       police: police.length,
+      policeDist: police.length ? Math.min(...police.map((c) => Math.hypot(c.x - (state.inCar ? state.inCar.x : player.pos.x), c.z - (state.inCar ? state.inCar.z : player.pos.z)))) : null,
+      enemyDist: (() => { let d = 1e9; for (const e of enemies) if (e.alive) d = Math.min(d, dist2d(e, player.pos)); return d === 1e9 ? null : d; })(),
       player: { x: player.pos.x, z: player.pos.z },
       car: state.inCar ? { x: state.inCar.x, z: state.inCar.z, health: state.inCar.health, speed: state.inCar.speed } : null,
       mission: currentMission() ? currentMission().name : null,
@@ -958,6 +960,9 @@ window.__MH = {
     };
   },
   debug: {
+    setCarHeading(rad) {
+      if (state.inCar) { state.inCar.heading = rad; state.inCar.mesh.rotation.y = rad; }
+    },
     teleport(x, z) {
       if (state.inCar) { state.inCar.x = x; state.inCar.z = z; state.inCar.speed = 0; }
       else { player.pos.set(x, 0, z); player.mesh.position.copy(player.pos); }

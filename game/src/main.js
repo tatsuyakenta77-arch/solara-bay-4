@@ -978,6 +978,22 @@ window.__MH = {
     },
     enterNearestCar() { tryEnterExitCar(); },
     exitCar() { exitCar(false); },
+    aimAtNearestEnemy() {
+      let best = null, bestD = 1e9;
+      for (const e of enemies) {
+        if (!e.alive) continue;
+        const d = dist2d(e, player.pos);
+        if (d < bestD) { best = e; bestD = d; }
+      }
+      if (!best) return false;
+      camYaw = Math.atan2(-(best.x - player.pos.x), -(best.z - player.pos.z));
+      return true;
+    },
+    nearestEnemyDist() {
+      let bestD = 1e9;
+      for (const e of enemies) if (e.alive) bestD = Math.min(bestD, dist2d(e, player.pos));
+      return bestD === 1e9 ? null : bestD;
+    },
   },
 };
 

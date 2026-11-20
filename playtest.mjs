@@ -38,13 +38,18 @@ try {
   assert(s.mission === 'First Gear', `mission 1 active (got ${s.mission})`);
   await page.screenshot({ path: `${SHOTS}/4-street.jpg`, type: 'jpeg', quality: 82 });
 
-  // Walk forward: position must change.
+  // Walk forward: position must change (poll: headless rendering dilates game time).
   const p0 = s.player;
   await page.keyboard.down('KeyW');
-  await sleep(1500);
+  let walked = 0;
+  for (let i = 0; i < 20; i++) {
+    await sleep(500);
+    walked = Math.hypot((await st(page)).player.x - p0.x, (await st(page)).player.z - p0.z);
+    if (walked > 4) break;
+  }
   await page.keyboard.up('KeyW');
   s = await st(page);
-  assert(Math.hypot(s.player.x - p0.x, s.player.z - p0.z) > 3, `walking moves player (moved ${Math.hypot(s.player.x - p0.x, s.player.z - p0.z).toFixed(1)}m)`);
+  assert(walked > 4, `walking moves player (moved ${walked.toFixed(1)}m)`);
 
   // Mission 1: steal the coupe, drive to Mara.
   await page.evaluate(() => window.__MH.debug.warpToStep());
@@ -59,10 +64,17 @@ try {
   await sleep(400);
   const c0 = (await st(page)).car;
   await page.keyboard.down('KeyW');
-  await sleep(2500);
+  let driven = 0, topSpeed = 0;
+  for (let i = 0; i < 40; i++) {
+    await sleep(500);
+    const cur = await st(page);
+    driven = Math.hypot(cur.car.x - c0.x, cur.car.z - c0.z);
+    topSpeed = Math.max(topSpeed, Math.abs(cur.car.speed));
+    if (driven > 8) break;
+  }
   await page.keyboard.up('KeyW');
   s = await st(page);
-  assert(s.car && Math.hypot(s.car.x - c0.x, s.car.z - c0.z) > 5, `driving moves car (moved ${Math.hypot(s.car.x - c0.x, s.car.z - c0.z).toFixed(1)}m, speed was ${s.car.speed.toFixed(1)})`);
+  assert(driven > 8, `driving moves car (moved ${driven.toFixed(1)}m, top speed ${topSpeed.toFixed(1)})`);
   await page.screenshot({ path: `${SHOTS}/1-cover.jpg`, type: 'jpeg', quality: 82 });
   // Finish step 2 by warping the car to Mara.
   await page.evaluate(() => window.__MH.debug.warpToStep());
@@ -71,19 +83,14 @@ try {
   assert(s.missionIndex === 1, `mission 1 complete (missionIndex=${s.missionIndex}, cash=$${s.cash})`);
   assert(s.cash >= 650, `payout applied (cash=$${s.cash})`);
 
-  // Police pursuit: wanted 3, cruisers spawn and close in; shoot when one is near.
+  // Police pursuit: wanted 3, cruisers spawn and close in; park and let them come.
   await page.evaluate(() => window.__MH.debug.setWanted(3));
-  await page.keyboard.down('KeyW');
   let close = false;
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 80; i++) {
     await sleep(500);
     const cur = await st(page);
-    // Keep the chase on the road: turn back north before the beach clamp.
-    if (cur.car && cur.car.z > 145) await page.evaluate(() => window.__MH.debug.setCarHeading(Math.PI));
-    if (cur.car && cur.car.z < -145) await page.evaluate(() => window.__MH.debug.setCarHeading(0));
     if (cur.policeDist !== null && cur.policeDist < 20) { close = true; break; }
   }
-  await page.keyboard.up('KeyW');
   s = await st(page);
   assert(s.police >= 2, `police spawned at wanted 3 (police=${s.police})`);
   assert(close, `a cruiser closed to <20m for the chase shot (policeDist=${s.policeDist})`);

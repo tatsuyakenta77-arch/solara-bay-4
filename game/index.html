@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian Heat — Open-World Crime Game</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+</head>
+<body>
+<div id="scene"></div>
+
+<div id="hud" hidden>
+  <div class="hud-corner hud-tl">
+    <div id="cash">$250</div>
+    <div id="stars" aria-label="wanted level">☆☆☆☆☆</div>
+    <div id="missionName"></div>
+    <div id="objective"></div>
+  </div>
+  <div class="hud-corner hud-tr"><canvas id="minimap" width="176" height="176"></canvas></div>
+  <div class="hud-corner hud-bl">
+    <div id="healthRow"><div id="healthFill"></div><span id="healthNum">100</span></div>
+    <div id="ammoRow">AMMO <span id="ammoNum">48</span> &nbsp;·&nbsp; <span id="weaponName">PISTOL</span></div>
+    <div id="carRow" hidden>CAR <span id="carHealth">100</span>%</div>
+  </div>
+  <div class="hud-corner hud-br"><div id="speed">0 km/h</div><div id="zone">DOWNTOWN</div></div>
+  <div id="toast"></div>
+  <div id="hint">WASD move / drive · E enter car · F punch · Click shoot · Space jump / handbrake · Shift run · Esc pause · M mute</div>
+  <div id="crosshair">+</div>
+  <div id="damageFlash"></div>
+</div>
+
+<div id="startMenu" class="menu">
+  <h1>MERIDIAN<br>HEAT</h1>
+  <p class="tagline">An open-world crime story in Port Meridian</p>
+  <p class="story">Jace Marlowe is back in Port Meridian for one last job with fixer Mara Quinn.
+    Steal cars, outrun the harbour police, settle the score at the docks — and own the city.</p>
+  <div class="btns">
+    <button id="btnNew">NEW GAME</button>
+    <button id="btnContinue">CONTINUE</button>
+    <button id="btnHow">HOW TO PLAY</button>
+  </div>
+  <div id="howBox" hidden>
+    <p><b>On foot:</b> WASD move, Shift run, Space jump, E enter a car, F punch, click to shoot, drag mouse to look around.</p>
+    <p><b>Driving:</b> W accelerate, S brake / reverse, A / D steer, Space handbrake, E step out.</p>
+    <p><b>Heat:</b> stealing cars, hitting pedestrians and shooting raises your wanted level. Police chase, ram and try to bust you.
+       Break line of sight and the heat cools off. Getting busted costs you a fine.</p>
+    <p>Finish all 6 story missions to own Port Meridian. Progress saves automatically. Esc pauses · M mutes.</p>
+  </div>
+  <p class="foot">An original game — no real city, person or brand is depicted. Best in desktop Chrome.</p>
+</div>
+
+<div id="pauseMenu" class="menu" hidden>
+  <h2>PAUSED</h2>
+  <p class="sub">Port Meridian waits for no one. Well — right now it does.</p>
+  <div class="btns">
+    <button id="btnResume">RESUME</button>
+    <button id="btnRestart">RESTART STORY</button>
+    <button id="btnQuit">SAVE &amp; QUIT TO MENU</button>
+  </div>
+</div>
+
+<div id="bustedMenu" class="menu" hidden>
+  <h2>BUSTED!</h2>
+  <p class="sub" id="bustedText">The Port Meridian PD caught you. Fine paid, heat cleared.</p>
+  <button id="btnBusted">BACK ON THE STREETS</button>
+</div>
+
+<div id="winMenu" class="menu" hidden>
+  <h2>MERIDIAN IS YOURS</h2>
+  <p class="sub" id="winText">All six jobs done. Mara Quinn nods once: the city belongs to Jace Marlowe now.</p>
+  <button id="btnFree">KEEP DRIVING (FREE ROAM)</button>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

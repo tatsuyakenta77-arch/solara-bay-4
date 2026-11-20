@@ -1,0 +1,60 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0b1020;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif; color: #f2f2f2; }
+#scene, #scene canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ---------- HUD ---------- */
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+.hud-corner { position: absolute; text-shadow: 0 2px 6px rgba(0,0,0,.85); }
+.hud-tl { top: 14px; left: 16px; }
+#cash { font-size: 30px; font-weight: 800; color: #7dff9a; letter-spacing: .5px; }
+#stars { font-size: 26px; letter-spacing: 4px; color: #ffd23e; margin: 2px 0 6px; }
+#stars.hot { color: #ff5340; }
+#missionName { font-size: 15px; font-weight: 700; color: #ffd23e; text-transform: uppercase; }
+#objective { font-size: 14px; color: #fff; max-width: 340px; line-height: 1.35; }
+.hud-tr { top: 12px; right: 14px; }
+#minimap { width: 176px; height: 176px; border-radius: 50%; border: 3px solid rgba(255,255,255,.75);
+  background: rgba(8, 14, 30, .85); box-shadow: 0 0 0 4px rgba(0,0,0,.35); }
+.hud-bl { left: 16px; bottom: 16px; }
+#healthRow { position: relative; width: 230px; height: 22px; background: rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.5); border-radius: 4px; overflow: hidden; }
+#healthFill { height: 100%; width: 100%; background: linear-gradient(90deg, #37d67a, #7dff9a); }
+#healthNum { position: absolute; inset: 0; text-align: center; line-height: 22px; font-weight: 800; font-size: 13px; }
+#ammoRow { margin-top: 6px; font-size: 15px; font-weight: 700; }
+#carRow { margin-top: 4px; font-size: 13px; font-weight: 700; color: #9fd8ff; }
+.hud-br { right: 16px; bottom: 16px; text-align: right; }
+#speed { font-size: 30px; font-weight: 800; }
+#zone { font-size: 13px; letter-spacing: 2px; color: #ffd23e; font-weight: 700; }
+#toast { position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
+  font-size: 26px; font-weight: 800; color: #ffd23e; text-align: center;
+  text-shadow: 0 2px 10px rgba(0,0,0,.9); opacity: 0; transition: opacity .25s; white-space: nowrap; }
+#hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  font-size: 12px; color: rgba(255,255,255,.75); white-space: nowrap; }
+#crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  font-size: 26px; font-weight: 700; color: rgba(255,255,255,.9); display: none;
+  text-shadow: 0 0 6px #000; }
+#damageFlash { position: absolute; inset: 0; pointer-events: none; opacity: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(255,0,0,.55) 100%); }
+
+/* ---------- Menus ---------- */
+.menu { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 24px;
+  background: linear-gradient(160deg, rgba(6,12,28,.88), rgba(40,8,20,.82)); }
+.menu[hidden] { display: none; }
+.menu h1 { font-size: 84px; line-height: .95; font-weight: 900; letter-spacing: 2px;
+  color: #ffd23e; text-shadow: 0 0 34px rgba(255,120,40,.55), 0 4px 0 #7a2a00; }
+.menu h2 { font-size: 52px; font-weight: 900; color: #ffd23e; letter-spacing: 2px;
+  text-shadow: 0 0 26px rgba(255,120,40,.5); }
+.menu .tagline { margin-top: 10px; font-size: 19px; color: #9fd8ff; font-weight: 600; }
+.menu .story, .menu .sub { max-width: 560px; margin-top: 14px; font-size: 16px; line-height: 1.5; color: #e8e8e8; }
+.menu .btns { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; justify-content: center; }
+.menu button { pointer-events: auto; cursor: pointer; font-size: 17px; font-weight: 800;
+  letter-spacing: 1px; color: #101010; background: linear-gradient(180deg, #ffd23e, #ff9d2e);
+  border: none; border-radius: 6px; padding: 13px 26px; box-shadow: 0 4px 0 #7a2a00; }
+.menu button:hover { filter: brightness(1.1); }
+.menu button:active { transform: translateY(2px); box-shadow: 0 2px 0 #7a2a00; }
+#howBox { max-width: 620px; margin-top: 20px; text-align: left; background: rgba(0,0,0,.45);
+  border: 1px solid rgba(255,255,255,.25); border-radius: 8px; padding: 16px 20px; }
+#howBox p { font-size: 14px; line-height: 1.55; margin-bottom: 8px; }
+#howBox b { color: #ffd23e; }
+.menu .foot { margin-top: 26px; font-size: 12px; color: rgba(255,255,255,.55); }
